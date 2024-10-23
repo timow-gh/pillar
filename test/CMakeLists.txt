@@ -1,0 +1,10 @@
+function(create_test testName)
+    add_executable(${testName} ${testName}.cpp)
+    target_link_libraries(${testName} PRIVATE gtest_main pillar::pillar)
+    add_test(NAME pillar.${testName} COMMAND ${testName})
+endfunction()
+
+create_test(AssertTest)
+create_test(LoggerTest)
+create_test(PillarDateTest)
+create_test(XDGBaseDirectoriesTest)
