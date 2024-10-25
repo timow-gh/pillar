@@ -7,6 +7,7 @@ message(STATUS "Found git: ${GIT_PROGRAM}")
 set(CURL_SOURCE_DIR "${CMAKE_BINARY_DIR}/custom_downloads/curl/curl")
 set(CURL_BUILD_DIR "${CMAKE_BINARY_DIR}/custom_downloads/curl/curl_build")
 set(CURL_INSTALL_DIR "${CMAKE_BINARY_DIR}/custom_downloads/curl/curl_install")
+set(CURL_BUILD_TYPE "Release")
 
 file(MAKE_DIRECTORY ${CURL_SOURCE_DIR})
 file(MAKE_DIRECTORY ${CURL_BUILD_DIR})
@@ -24,6 +25,7 @@ endfunction()
 
 execute_process(
         COMMAND git clone --depth 1 --branch ${CURL_TAG} ${CURL_REPO_URL} ${CURL_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         RESULT_VARIABLE CURL_CLONE_RESULT
 #        OUTPUT_VARIABLE CURL_CLONE_OUTPUT_RESULT
         ERROR_VARIABLE CURL_CLONE_ERROR_RESULT
@@ -40,7 +42,7 @@ message(STATUS "Found cmake: ${CMAKE_PROGRAM}")
 execute_process(
         COMMAND ${CMAKE_PROGRAM} -S ${CURL_SOURCE_DIR} -B ${CURL_BUILD_DIR} -G ${CMAKE_GENERATOR}
         -DBUILD_SHARED_LIBS=OFF
-        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_BUILD_TYPE=${CURL_BUILD_TYPE}
         -DCMAKE_INSTALL_PREFIX=${CURL_INSTALL_DIR}
         -DCURL_WERROR=OFF
         -DPICKY_COMPILER=ON
@@ -57,7 +59,7 @@ print_result_vars(CURL_CONFIGURE)
 
 # Build curl project
 execute_process(
-        COMMAND ${CMAKE_PROGRAM} --build ${CURL_BUILD_DIR} --config "Release" --parallel
+        COMMAND ${CMAKE_PROGRAM} --build ${CURL_BUILD_DIR} --config "${CURL_BUILD_TYPE}" --parallel
         RESULT_VARIABLE CURL_BUILD_RESULT
         ERROR_VARIABLE CURL_BUILD_ERROR_RESULT
 )
@@ -65,7 +67,7 @@ print_result_vars(CURL_BUILD)
 
 # Install curl project
 execute_process(
-        COMMAND ${CMAKE_PROGRAM} --install ${CURL_BUILD_DIR} --config "Release"
+        COMMAND ${CMAKE_PROGRAM} --install ${CURL_BUILD_DIR} --config "${CURL_BUILD_TYPE}"
         RESULT_VARIABLE CURL_INSTALL_RESULT
         OUTPUT_VARIABLE CURL_INSTALL_OUTPUT_RESULT
         ERROR_VARIABLE CURL_INSTALL_ERROR_RESULT

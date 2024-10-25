@@ -4,33 +4,20 @@ set(VCPKG_LIBRARY_LINKAGE static)
 
 set(VCPKG_CXX_FLAGS_DEBUG "${VCPKG_CXX_FLAGS} -stdlib=libc++")
 set(VCPKG_CXX_FLAGS_RELEASE "${VCPKG_CXX_FLAGS} -stdlib=libc++")
-set(VCPKG_C_FLAGS_DEBUG "${VCPKG_C_FLAGS} -stdlib=libc++")
-set(VCPKG_C_FLAGS_RELEASE "${VCPKG_C_FLAGS} -stdlib=libc++")
+set(VCPKG_C_FLAGS_DEBUG "${VCPKG_C_FLAGS}")
+set(VCPKG_C_FLAGS_RELEASE "${VCPKG_C_FLAGS}")
 
-# set(VCPKG_CXX_FLAGS_DEBUG "${VCPKG_CXX_FLAGS} -stdlib=libc++ -std=c++23")
-# set(VCPKG_CXX_FLAGS_RELEASE "${VCPKG_CXX_FLAGS} -stdlib=libc++ -std=c++23")
-# set(VCPKG_C_FLAGS_DEBUG "${VCPKG_C_FLAGS} -stdlib=libc++ -std=c++23")
-# set(VCPKG_C_FLAGS_RELEASE "${VCPKG_C_FLAGS} -stdlib=libc++ -std=c++23")
+# Set the generator to Ninja explicitly
+set(CMAKE_GENERATOR "Ninja" CACHE STRING "" FORCE)
+message(STATUS "Using CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 
-# Specify the C and C++ compilers
-# set(VCPKG_C_COMPILER clang)
-# set(VCPKG_CXX_COMPILER clang++)
+# Alternatively, set CMAKE_MAKE_PROGRAM explicitly
+set(CMAKE_MAKE_PROGRAM "/usr/bin/ninja" CACHE FILEPATH "Ninja executable" FORCE)
+message(STATUS "Using CMAKE_MAKE_PROGRAM: ${CMAKE_MAKE_PROGRAM}")
 
-# Optional: Specify the full path to clang and clang++ if not in PATH
-# set(VCPKG_C_COMPILER /usr/bin/clang)
-# set(VCPKG_CXX_COMPILER /usr/bin/clang++)
+set(VCPKG_CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/toolchain-linux-clang.cmake")
 
-# set(CMAKE_C_COMPILER clang)
-# set(CMAKE_CXX_COMPILER clang++) 
-
-# set(CMAKE_C_COMPILER "/usr/bin/clang")
-# set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
-
-set(VCPKG_CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/../../toolchains/linux-clang.cmake")
-
-message(STATUS "Using x64-linux-cpp23 toolchain file VCPKG_CMAKE_TOOLCHAIN_FILE: ${VCPKG_CMAKE_TOOLCHAIN_FILE}")
-message(STATUS "Using x64-linux-cpp23 with CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
-message(STATUS "Using x64-linux-cpp23 with CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
+message(STATUS "Using VCPKG_CMAKE_TOOLCHAIN_FILE: ${VCPKG_CMAKE_TOOLCHAIN_FILE}")
 
 set(VCPKG_CMAKE_SYSTEM_NAME Linux)
 

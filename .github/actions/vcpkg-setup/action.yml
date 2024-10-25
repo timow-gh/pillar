@@ -1,0 +1,103 @@
+# .github/actions/vcpkg-setup/action.yml
+
+name: vcpkg-setup
+description: Action to clone and bootstrap vcpkg with caching.
+
+inputs:
+  token:
+    description: "GitHub token to authenticate API requests. Recommended to use: <github.token>"
+    required: true
+    default: ''
+  revision:
+    description: "vcpkg revision to checkout. Can be a commit hash, tag, or branch name."
+    required: false
+    default: ''
+  fetch-depth:
+    description: "Fetch depth for vcpkg checkout. Set to 0 for full history if using a commit hash."
+    required: false
+    default: 1
+    type: number
+  install-dir:
+    description: "Relative directory to install vcpkg. Defaults to 'vcpkg'."
+    required: false
+    default: 'vcpkg'
+  runner-os:
+    description: "Operating system as given by <runner.os>"
+    required: false
+  cache-key:
+    description: "Cache key used to restore the vcpkg repository."
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Common Variables
+      shell: bash
+      run: |
+        # Ensure install-dir is relative
+        if [[ "${{ inputs.install-dir }}" == /* ]]; then
+          echo "Error: install-dir must be a relative path within the workspace." >&2
+          exit 1
+        fi
+        echo "VCPKG_ROOT=${{ github.workspace }}/${{ inputs.install-dir }}" >> $GITHUB_ENV
+
+    - name: Determine Checkout Revision and Fetch Depth
+      id: determine-checkout-revision
+      shell: bash
+      run: |
+        if [[ -n "${{ inputs.revision }}" ]]; then
+          revision="${{ inputs.revision }}"
+        
+          # Check if the revision is a 40-character hexadecimal commit hash
+          if [[ "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "vcpkg_revision=$revision" >> $GITHUB_OUTPUT
+            echo "fetch_depth=0" >> $GITHUB_OUTPUT
+          else
+            echo "vcpkg_revision=$revision" >> $GITHUB_OUTPUT
+            echo "fetch_depth=${{ inputs.fetch-depth }}" >> $GITHUB_OUTPUT
+          fi
+        else
+          # Fetch the latest release tag using GitHub API
+          latest_release=$(curl -s -H "Authorization: token ${{ inputs.token }}" https://api.github.com/repos/microsoft/vcpkg/releases/latest | jq -r .tag_name)
+          echo "vcpkg_revision=$latest_release" >> $GITHUB_OUTPUT
+          echo "fetch_depth=${{ inputs.fetch-depth }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Cache vcpkg Repository
+      uses: actions/cache@v3
+      id: cache-vcpkg-repo
+      with:
+        path: ${{ env.VCPKG_ROOT }}
+        key: vcpkg-repo-${{ steps.determine-checkout-revision.outputs.vcpkg_revision }}-${{ inputs.cache-key }}
+
+    - name: Restore vcpkg Repository from Cache
+      if: steps.cache-vcpkg-repo.outputs.cache-hit != 'true'
+      run: echo "Cache miss for vcpkg repository. Proceeding to clone and bootstrap."
+      shell: bash
+
+    - name: Checkout vcpkg
+      if: steps.cache-vcpkg-repo.outputs.cache-hit != 'true'
+      uses: actions/checkout@v3
+      with:
+        repository: microsoft/vcpkg
+        ref: '${{ steps.determine-checkout-revision.outputs.vcpkg_revision }}'
+        path: ${{ inputs.install-dir }}  # Relative path
+        fetch-depth: ${{ steps.determine-checkout-revision.outputs.fetch_depth }}
+        token: ${{ inputs.token }}
+
+    - name: Bootstrap vcpkg
+      if: steps.cache-vcpkg-repo.outputs.cache-hit != 'true'
+      working-directory: ${{ env.VCPKG_ROOT }}
+      shell: bash
+      run: |
+        if [[ "${{ inputs.runner-os }}" == "Windows" ]]; then
+          cmd "/c bootstrap-vcpkg.bat"
+        else
+          ./bootstrap-vcpkg.sh
+        fi
+
+    - name: Setup Environment
+      shell: bash
+      run: |
+        echo "${{ env.VCPKG_ROOT }}/vcpkg" >> $GITHUB_PATH

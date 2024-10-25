@@ -1,0 +1,105 @@
+name: linux
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'develop-*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cxx: clang++-18
+            c: clang-18
+            cxxflags: -stdlib=libc++
+            cmake_preset: unixlike-clang-release
+            cmake_test_preset: test-unixlike-clang-release
+            cmd_install: |
+              sudo apt update
+
+              sudo apt install -y wget gnupg software-properties-common
+              wget https://apt.llvm.org/llvm.sh
+              chmod +x llvm.sh
+              sudo ./llvm.sh 18
+              sudo apt install -y clang-18 libc++-18-dev libc++abi-18-dev ninja-build
+
+              sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
+              sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
+            cmd_compiler_version: |
+              clang++ --version
+              clang++-18 --version
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Generate Cache Key
+        id: generate-cache-key
+        run: |
+          # Define the files to hash, separated by commas
+          files_pattern="x64-linux-cpp23.cmake,toolchain-linux-clang.cmake,CMakePresets.json"
+          
+          # Use the hashFiles function provided by GitHub Actions
+          file_hash="${{ hashFiles('x64-linux-cpp23.cmake','toolchain-linux-clang.cmake','CMakePresets.json','vcpkg.json') }}"
+          
+          # Append compiler variables to the hash_components string
+          combined_string="${file_hash}|${{ matrix.cxx }}|${{ matrix.c }}"
+          
+          # Compute the final SHA256 hash
+          final_hash=$(echo -n "$combined_string" | sha256sum | awk '{print $1}')
+          
+          # **Print the cache_key to the logs**
+          echo "cache_key=$final_hash"
+          
+          # Set the cache_key output
+          echo "cache_key=$final_hash" >> $GITHUB_OUTPUT
+
+      - name: Create Build Environment
+        run: |
+          ${{ matrix.cmd_install }}
+
+      - name: Compiler Version
+        run: |
+          ${{matrix.cmd_compiler_version}}
+
+      - name: Ninja Version
+        run: |
+          which ninja
+          ninja --version
+
+      - name: Run vcpkg-setup
+        uses: ./.github/actions/vcpkg-setup
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          revision: '10b7a178346f3f0abef60cecd5130e295afd8da4'
+          install-dir: 'vcpkg'  # Relative path within the workspace
+          runner-os: ${{ runner.os }}
+          cache-key: ${{ steps.generate-cache-key.outputs.cache_key }}
+
+      - name: Configure
+        env:
+          C: ${{ matrix.c }} # vcpkg will use this env variable
+          CXX: ${{ matrix.cxx }} # vcpkg will use this env variable
+        run: |
+          cmake --preset "${{ matrix.cmake_preset }}" \
+                -DCMAKE_C_COMPILER=${{ matrix.c }} \
+                -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+                $GITHUB_WORKSPACE
+
+      - name: Build
+        run: |
+          threads=$(nproc)
+          cmake --build "./out/build/${{ matrix.cmake_preset }}" --parallel $threads
+
+      - name: Test
+        run: ctest --preset "${{ matrix.cmake_test_preset }}"
+        env:
+          CTEST_OUTPUT_ON_FAILURE: true
