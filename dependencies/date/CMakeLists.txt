@@ -27,7 +27,7 @@ execute_process(
         COMMAND git clone --depth 1 --branch ${CURL_TAG} ${CURL_REPO_URL} ${CURL_SOURCE_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         RESULT_VARIABLE CURL_CLONE_RESULT
-#        OUTPUT_VARIABLE CURL_CLONE_OUTPUT_RESULT
+        #        OUTPUT_VARIABLE CURL_CLONE_OUTPUT_RESULT
         ERROR_VARIABLE CURL_CLONE_ERROR_RESULT
 )
 print_result_vars(CURL_CLONE)
@@ -37,6 +37,9 @@ if (NOT CMAKE_PROGRAM)
     message(FATAL_ERROR "cmake not found!")
 endif ()
 message(STATUS "Found cmake: ${CMAKE_PROGRAM}")
+
+set(OPENSSL_ROOT_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
+message(STATUS "OPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}")
 
 # Configure the curl project
 execute_process(
@@ -52,10 +55,22 @@ execute_process(
         -DBUILD_STATIC_CURL=ON
         -DENABLE_ARES=OFF
         -DCURL_DISABLE_INSTALL=OFF
+        -DCURL_ENABLE_SSL=ON
+        -DCURL_USE_SCHANNEL=ON # Native windows SSL
+#        -DCMAKE_USE_OPENSSL=ON # Use on linux systems
+        -DCURL_STATIC_CRT=ON
+#        -DCURL_USE_PKGCONFIG=ON
+        -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} # vcpkg installation path
+        -DCMAKE_PREFIX_PATH=${OPENSSL_ROOT_DIR} # vcpkg installation path
         RESULT_VARIABLE CURL_CONFIGURE_RESULT
         ERROR_VARIABLE CURL_CONFIGURE_ERROR_RESULT
 )
 print_result_vars(CURL_CONFIGURE)
+# Check if the configuration was successful
+if(NOT CURL_CONFIGURE_RESULT EQUAL 0)
+    # Output the error messages captured
+    message(FATAL_ERROR "CURL configuration failed with error:\n${CURL_CONFIGURE_ERROR_RESULT}")
+endif()
 
 # Build curl project
 execute_process(

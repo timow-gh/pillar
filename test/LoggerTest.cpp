@@ -36,20 +36,27 @@ TEST(Logger, log_level)
 TEST(Logger, create_logger)
 {
   auto loggerDir = pillar::xdg::get_data_home("timow", "pillar_log_test");
-  std::filesystem::remove_all(loggerDir);
-  std::filesystem::create_directories(loggerDir);
+  EXPECT_NO_THROW(std::filesystem::remove_all(loggerDir));
+  EXPECT_NO_THROW(std::filesystem::create_directories(loggerDir));
 
-  auto logFile = loggerDir / "testLog.txt";
-  auto logger = pillar::create_logger(logFile, "MainLogger");
-  const std::string testString = "Test log.";
-  logger->info(testString);
-  logger->flush();
+  {
+    auto logFile = loggerDir / "testLog.txt";
+    auto logger = pillar::create_logger(logFile, "MainLogger");
+    const std::string testString = "Test log.";
+    logger->info(testString);
+    logger->flush();
 
-  std::ifstream ifstream;
-  ifstream.open(logFile.c_str());
+    std::ifstream ifstream;
+    ifstream.open(logFile.c_str());
 
-  std::string line;
-  std::getline(ifstream, line);
+    std::string line;
+    std::getline(ifstream, line);
 
-  EXPECT_TRUE(line.contains(testString));
+    EXPECT_TRUE(line.contains(testString));
+  }
+
+  auto parentDir = loggerDir.parent_path();
+  ASSERT_TRUE(std::filesystem::is_directory(parentDir));
+  ASSERT_TRUE(parentDir.filename() == "timow");
+  EXPECT_NO_THROW(std::filesystem::remove_all(parentDir));
 }

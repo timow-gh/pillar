@@ -34,7 +34,7 @@ if (IS_TOP_LEVEL_PROJECT)
     option(${PROJECT_NAME}_USE_WARNINGS "Compile using warnings." ON)
     option(${PROJECT_NAME}_WARNINGS_AS_ERRORS "Treat compiler warnings as errors " OFF)
     option(${PROJECT_NAME}_STATIC_ANALYSIS "" ON)
-    option(${PROJECT_NAME}_USE_CPPCHECK "" ON)
+    option(${PROJECT_NAME}_USE_CPPCHECK "" OFF)
     option(${PROJECT_NAME}_TESTS "" ON)
 else ()
     option(${PROJECT_NAME}_USE_SCCACHE "Use sccache" OFF)
@@ -58,6 +58,7 @@ if (${PROJECT_NAME}_STATIC_ANALYSIS)
 endif ()
 
 find_package(spdlog REQUIRED CONFIG)
+find_package(OpenSSL REQUIRED)
 
 add_subdirectory(dependencies)
 

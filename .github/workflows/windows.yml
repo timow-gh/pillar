@@ -1,0 +1,52 @@
+name: windows
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'develop-*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://github.com/actions/virtual-environments.
+        platform: [x64]
+        toolset: [v143]
+        standard: [20]
+        shared: [""]
+        build_type: [Debug]
+        cmake_preset: [windows-msvc-debug]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Ninja using Chocolatey
+        run: |
+          choco install ninja -y
+          ninja --version
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{runner.workspace}}/build
+
+      - name: Run vcpkg-setup
+        uses: ./.github/actions/vcpkg-setup
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          revision: '10b7a178346f3f0abef60cecd5130e295afd8da4'
+          install-dir: 'vcpkg'  # Relative path within the workspace
+          runner-os: ${{ runner.os }}
+
+      - name: Configure
+        # Use a bash shell for $GITHUB_WORKSPACE.
+        shell: bash
+        working-directory: ${{runner.workspace}}/build
+        run: |
+          cmake --preset "${{ matrix.cmake_preset }}" \
+                $GITHUB_WORKSPACE
