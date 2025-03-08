@@ -7,7 +7,6 @@
 namespace pillar
 {
 
-using logger_ptr = std::shared_ptr<spdlog::logger>;
 using log_level_enum = spdlog::level::level_enum;
 
 // Settings used to create loggers using create_logger()
@@ -18,7 +17,7 @@ void set_max_log_files(std::size_t maxFiles);
 log_level_enum get_log_level();
 void set_log_level(log_level_enum level);
 
-logger_ptr create_logger(const std::filesystem::path& logFilePath, const std::string& loggerName);
+std::shared_ptr<spdlog::logger> create_logger(const std::filesystem::path& logFilePath, const std::string& loggerName);
 
 } // namespace pillar
 

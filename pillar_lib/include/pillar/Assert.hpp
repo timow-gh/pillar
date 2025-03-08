@@ -41,23 +41,28 @@
 namespace pillar
 {
 
-void assertion(const char* fileName, int line, const char* funcName, const char* message);
+void print_assertion(const char* fileName, int line, const char* funcName, const char* message);
+
+inline bool assertion(bool condition, const char* fileName, int line, const char* funcName, const char* message)
+{
+  if (PILLAR_UNLIKELY(condition))
+  {
+    print_assertion(fileName, line, funcName, message);
+    PILLAR_ASSERT_TRAP();
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
 
 } // namespace pillar
 
 #if defined(NDEBUG) && NDEBUG
-#define PILLAR_ASSERT(...)
+#define PILLAR_ASSERT(...) (!(__VA_ARGS__))
 #else
-#define PILLAR_ASSERT(...)                                                                                                                   \
-  do                                                                                                                                       \
-  {                                                                                                                                        \
-    if (PILLAR_UNLIKELY(!(__VA_ARGS__)))                                                                                                     \
-    {                                                                                                                                      \
-      ::pillar::assertion(__FILE__, __LINE__, __func__, #__VA_ARGS__);                                                                       \
-      PILLAR_ASSERT_TRAP();                                                                                                                  \
-    }                                                                                                                                      \
-  }                                                                                                                                        \
-  while (false)
+#define PILLAR_ASSERT(...) assertion(!(__VA_ARGS__), __FILE__, __LINE__, __func__, #__VA_ARGS__)
 #endif
 
 #endif // PILLAR_ASSERT_HPP

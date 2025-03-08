@@ -4,5 +4,5 @@
 
 TEST(AssertTest, assertion)
 {
-  pillar::assertion("testfilename.cpp", 1,"test_func_name", "test assertion message");
+  pillar::print_assertion("testfilename.cpp", 1,"test_func_name", "test print_assertion message");
 }
