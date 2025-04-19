@@ -44,6 +44,9 @@ jobs:
       - name: Generate Cache Key
         id: generate-cache-key
         run: |
+          # Get the actual compiler version string
+          compiler_version=$(${{ matrix.cxx }} --version | head -n 1)
+          
           # Define the files to hash, separated by commas
           files_pattern="x64-linux-cpp23.cmake,toolchain-linux-clang.cmake,CMakePresets.json"
           
@@ -51,13 +54,14 @@ jobs:
           file_hash="${{ hashFiles('x64-linux-cpp23.cmake','toolchain-linux-clang.cmake','CMakePresets.json','vcpkg.json') }}"
           
           # Append compiler variables to the hash_components string
-          combined_string="${file_hash}|${{ matrix.cxx }}|${{ matrix.c }}"
+          combined_string="${file_hash}|${{ matrix.cxx }}|${{ matrix.c }}|${compiler_version}"
           
           # Compute the final SHA256 hash
           final_hash=$(echo -n "$combined_string" | sha256sum | awk '{print $1}')
           
-          # **Print the cache_key to the logs**
+          # Print the cache_key to the logs
           echo "cache_key=$final_hash"
+          echo "compiler_version=$compiler_version"
           
           # Set the cache_key output
           echo "cache_key=$final_hash" >> $GITHUB_OUTPUT
