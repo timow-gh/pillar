@@ -5,6 +5,8 @@
 
 class PillarDateTest : public ::testing::Test {
 protected:
+  
+  // cppcheck-suppress unusedFunction
   void SetUp() override
   {
     remove_data_dir();
@@ -15,7 +17,11 @@ protected:
     pillar::date::DateErrors res = pillar::date::set_time_zone_db_directory(m_tzdbDirectory);
     ASSERT_EQ(res, pillar::date::DateErrors::SUCCESS);
   }
-  void TearDown() override { remove_data_dir(); }
+
+  // cppcheck-suppress unusedFunction
+  void TearDown() override { 
+    remove_data_dir(); 
+  }
 
   void remove_data_dir()
   {
@@ -24,7 +30,7 @@ protected:
   }
 
   std::filesystem::path m_testDir = pillar::xdg::get_data_home("timow", "pillar_test");
-  std::filesystem::path m_tzdbDirectory = m_testDir / "time_zone_db";
+  std::filesystem::path m_tzdbDirectory = m_testDir / "tzdata";
 };
 
 class PillarDateFailDBTest : public ::testing::Test {

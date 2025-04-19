@@ -44,7 +44,8 @@ DateErrors set_time_zone_db_directory(const std::filesystem::path& tzDbLocation)
     return DateErrors::PATH_ALREADY_EXISTS;
   }
 
-  ::date::set_install(tzDbLocation.string());
+  std::string tzDbLocationStr = tzDbLocation.string();
+  ::date::set_install(tzDbLocationStr);
   ::date::reload_tzdb();
   time_zone_db_location() = tzDbLocation;
   return DateErrors::SUCCESS;
