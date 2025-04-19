@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - cxx: clang++-18
-            c: clang-18
+          - cxx: clang++-20
+            c: clang-20
             cxxflags: -stdlib=libc++
             cmake_preset: unixlike-clang-release
             cmake_test_preset: test-unixlike-clang-release
@@ -28,14 +28,14 @@ jobs:
               sudo apt install -y wget gnupg software-properties-common
               wget https://apt.llvm.org/llvm.sh
               chmod +x llvm.sh
-              sudo ./llvm.sh 18
-              sudo apt install -y clang-18 libc++-18-dev libc++abi-18-dev ninja-build
+              sudo ./llvm.sh 20
+              sudo apt install -y clang-20 libc++-20-dev libc++abi-20-dev ninja-build
 
-              sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
-              sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
+              sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100
+              sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
             cmd_compiler_version: |
               clang++ --version
-              clang++-18 --version
+              clang++-20 --version
 
     steps:
       - name: Checkout repository
