@@ -1,4 +1,5 @@
 #include "pillar/Logger.hpp"
+#include "pillar/Assert.hpp"
 #include "pillar/XDGBaseDirectories.hpp"
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -54,29 +55,31 @@ void set_log_level(spdlog::level::level_enum level)
   logger_settings().loglevel = level;
 }
 
-logger_ptr create_logger(const std::filesystem::path& logFilePath, const std::string& loggerName)
+std::shared_ptr<spdlog::logger> create_logger(const std::filesystem::path& logFilePath, const std::string& loggerName)
 {
-  if (loggerName.empty())
+  if (PILLAR_ASSERT(!loggerName.empty()))
   {
     return nullptr;
   }
 
-  if (!std::filesystem::exists(logFilePath.parent_path()))
+  if (PILLAR_ASSERT(std::filesystem::exists(logFilePath.parent_path())))
   {
     return nullptr;
   }
 
   const auto loglevel = logger_settings().loglevel;
 
+  const std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%l] [thread %t] [pid %P] %v";
+
   auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   consoleSink->set_level(loglevel);
-  consoleSink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [thread %t] %v");
+  consoleSink->set_pattern(pattern);
 
   auto fileSink =
       std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFilePath.string(), logger_settings().maxSize, logger_settings().maxFiles);
 
   fileSink->set_level(loglevel);
-  fileSink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [thread %t] %v");
+  fileSink->set_pattern(pattern);
 
   auto logger = std::make_shared<spdlog::logger>(loggerName, spdlog::sinks_init_list{consoleSink, fileSink});
   logger->set_level(loglevel);
