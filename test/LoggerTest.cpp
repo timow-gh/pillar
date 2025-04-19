@@ -43,7 +43,9 @@ protected:
     return loggerDir;
   }
 
+  // cppcheck-suppress unusedFunction
   void SetUp() override { m_loggerDir = init_logger_test_dir(m_appAuthor, m_appName); }
+  // cppcheck-suppress unusedFunction
   void TearDown() override { m_loggerDir = init_logger_test_dir(m_appAuthor, m_appName); }
 
   std::string m_appAuthor = "timow";
