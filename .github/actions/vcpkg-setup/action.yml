@@ -22,8 +22,8 @@ inputs:
     required: false
     default: 'vcpkg'
   runner-os:
-    description: "Operating system as given by <runner.os>"
-    required: false
+    description: "Operating system as given by <runner.os>. Must be specified."
+    required: true
   cache-key:
     description: "Cache key used to restore the vcpkg repository."
     required: false
@@ -32,6 +32,14 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Validate Required Inputs
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.runner-os }}" ]]; then
+          echo "Error: runner-os must be specified (e.g., 'Linux', 'Windows')" >&2
+          exit 1
+        fi
+        
     - name: Set Common Variables
       shell: bash
       run: |
@@ -41,7 +49,7 @@ runs:
           exit 1
         fi
         echo "VCPKG_ROOT=${{ github.workspace }}/${{ inputs.install-dir }}" >> $GITHUB_ENV
-
+        
     - name: Determine Checkout Revision and Fetch Depth
       id: determine-checkout-revision
       shell: bash
@@ -58,8 +66,19 @@ runs:
             echo "fetch_depth=${{ inputs.fetch-depth }}" >> $GITHUB_OUTPUT
           fi
         else
-          # Fetch the latest release tag using GitHub API
-          latest_release=$(curl -s -H "Authorization: token ${{ inputs.token }}" https://api.github.com/repos/microsoft/vcpkg/releases/latest | jq -r .tag_name)
+          # Try to fetch the latest release tag using GitHub API with jq
+          if command -v jq >/dev/null 2>&1; then
+            latest_release=$(curl -s -H "Authorization: token ${{ inputs.token }}" https://api.github.com/repos/microsoft/vcpkg/releases/latest | jq -r .tag_name)
+            if [ -z "$latest_release" ] || [ "$latest_release" == "null" ]; then
+              # Fallback to a known stable version if API call fails
+              echo "Warning: Could not determine latest release tag, using default stable version." >&2
+              latest_release="2023.10.19"
+            fi
+          else
+            # Fallback for environments without jq
+            echo "Warning: jq not available, using default stable version." >&2
+            latest_release="2023.10.19"
+          fi
           echo "vcpkg_revision=$latest_release" >> $GITHUB_OUTPUT
           echo "fetch_depth=${{ inputs.fetch-depth }}" >> $GITHUB_OUTPUT
         fi
@@ -69,7 +88,7 @@ runs:
       id: cache-vcpkg-repo
       with:
         path: ${{ env.VCPKG_ROOT }}
-        key: vcpkg-repo-${{ steps.determine-checkout-revision.outputs.vcpkg_revision }}-${{ inputs.cache-key }}
+        key: vcpkg-repo-${{ steps.determine-checkout-revision.outputs.vcpkg_revision }}-${{ inputs.cache-key }}-${{ inputs.runner-os }}
 
     - name: Restore vcpkg Repository from Cache
       if: steps.cache-vcpkg-repo.outputs.cache-hit != 'true'
@@ -92,12 +111,30 @@ runs:
       shell: bash
       run: |
         if [[ "${{ inputs.runner-os }}" == "Windows" ]]; then
-          cmd "/c bootstrap-vcpkg.bat"
+          # Windows needs cmd to run batch files
+          cmd "/c bootstrap-vcpkg.bat -disableMetrics"
+        elif [[ "${{ inputs.runner-os }}" == "Linux" ]] || [[ "${{ inputs.runner-os }}" == "macOS" ]]; then
+          # Linux/macOS uses the shell script
+          ./bootstrap-vcpkg.sh -disableMetrics
         else
-          ./bootstrap-vcpkg.sh
+          echo "Error: Unsupported runner OS: ${{ inputs.runner-os }}. Must be 'Windows', 'Linux', or 'macOS'." >&2
+          exit 1
         fi
 
     - name: Setup Environment
       shell: bash
       run: |
-        echo "${{ env.VCPKG_ROOT }}/vcpkg" >> $GITHUB_PATH
+        if [[ "${{ inputs.runner-os }}" == "Windows" ]]; then
+          # Windows path handling
+          echo "${{ env.VCPKG_ROOT }}\\vcpkg" >> $GITHUB_PATH
+          # Set additional Windows-specific environment variables
+          echo "VCPKG_DEFAULT_TRIPLET=x64-windows" >> $GITHUB_ENV
+          echo "VCPKG_INSTALLATION_ROOT=${{ env.VCPKG_ROOT }}" >> $GITHUB_ENV
+        elif [[ "${{ inputs.runner-os }}" == "Linux" ]] || [[ "${{ inputs.runner-os }}" == "macOS" ]]; then
+          # Unix-style paths
+          echo "${{ env.VCPKG_ROOT }}/vcpkg" >> $GITHUB_PATH
+          echo "VCPKG_INSTALLATION_ROOT=${{ env.VCPKG_ROOT }}" >> $GITHUB_ENV
+        else
+          echo "Error: Unsupported runner OS: ${{ inputs.runner-os }}. Must be 'Windows', 'Linux', or 'macOS'." >&2
+          exit 1
+        fi
