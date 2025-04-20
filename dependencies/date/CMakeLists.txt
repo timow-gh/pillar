@@ -22,7 +22,6 @@ function(print_result_vars name)
     message("${name}_ERROR_RESULT error: ${${name}_ERROR_RESULT}")
 endfunction()
 
-
 execute_process(
         COMMAND git clone --depth 1 --branch ${CURL_TAG} ${CURL_REPO_URL} ${CURL_SOURCE_DIR}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -38,7 +37,16 @@ if (NOT CMAKE_PROGRAM)
 endif ()
 message(STATUS "Found cmake: ${CMAKE_PROGRAM}")
 
-# Configure the curl project
+# Check if the 7z.exe file exists in the specified path
+if (EXISTS "C:/Program Files (x86)/7-Zip/7z.exe")
+    message(STATUS "7z.exe found in the specified path.")
+else ()
+    message(FATAL_ERROR "7z.exe not found in the required path. date library requires 7-zip to be installed and either retrievable via the registry or installed in the path \"C:/Program Files (x86)/7-Zip/7z.exe\", thats insane!")
+    message(WARNING "Getting rid of this ridiculous requirement is on the TODO list and will require a fork or a merge request to the date library")
+    return()
+endif ()
+
+# Configure the curl project without zlib
 execute_process(
         COMMAND ${CMAKE_PROGRAM} -S ${CURL_SOURCE_DIR} -B ${CURL_BUILD_DIR} -G ${CMAKE_GENERATOR}
         -DBUILD_SHARED_LIBS=OFF
@@ -52,7 +60,10 @@ execute_process(
         -DBUILD_STATIC_CURL=ON
         -DENABLE_ARES=OFF
         -DCURL_DISABLE_INSTALL=OFF
-        $<$<PLATFORM_ID:Windows>:-DCURL_USE_SCHANNEL=ON>
+        -DCURL_USE_SCHANNEL=ON
+        -DCURL_ZLIB=OFF
+        -DCURL_BROTLI=OFF
+        -DCURL_ZSTD=OFF
         RESULT_VARIABLE CURL_CONFIGURE_RESULT
         ERROR_VARIABLE CURL_CONFIGURE_ERROR_RESULT
 )
@@ -62,6 +73,7 @@ print_result_vars(CURL_CONFIGURE)
 execute_process(
         COMMAND ${CMAKE_PROGRAM} --build ${CURL_BUILD_DIR} --config "${CURL_BUILD_TYPE}" --parallel
         RESULT_VARIABLE CURL_BUILD_RESULT
+        OUTPUT_VARIABLE CURL_BUILD_OUTPUT_RESULT
         ERROR_VARIABLE CURL_BUILD_ERROR_RESULT
 )
 print_result_vars(CURL_BUILD)
@@ -84,6 +96,7 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/HowardHinnant/date.git
         GIT_TAG v3.0.2)
 
+# Configure date library options
 set(USE_SYSTEM_TZ_DB OFF CACHE BOOL "Use the operating system's timezone database" FORCE)
 set(MANUAL_TZ_DB OFF CACHE BOOL "User will set TZ DB manually by invoking set_install in their code" FORCE)
 set(USE_TZ_DB_IN_DOT OFF CACHE BOOL "Save the timezone database in the current folder" FORCE)
