@@ -1,0 +1,66 @@
+name: windows
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'develop-*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cmake_preset: windows-msvc-release
+            cmake_test_preset: test-windows-msvc-release
+            cmd_install: |
+              choco install -y ninja
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Setup Visual Studio Development Environment
+      # This sets up all necessary environment variables to replicate
+      # the Visual Studio Developer Command Prompt without being in it.
+      # I.e. it sets up the PATH, LIB, INCLUDE, etc., which adds the
+      # cl.exe compiler to the PATH.
+      - name: Setup Visual Studio Development Environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Create Build Environment
+        run: |
+          ${{ matrix.cmd_install }}
+
+      - name: Ninja Version
+        run: |
+          ninja --version
+
+      - name: Run vcpkg-setup
+        uses: ./.github/actions/vcpkg-setup
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          revision: '10b7a178346f3f0abef60cecd5130e295afd8da4'
+          install-dir: 'vcpkg'  # Relative path within the workspace
+          runner-os: ${{ runner.os }}
+          cache-key: ''
+
+      - name: Configure
+        run: |
+          cmake --preset "${{ matrix.cmake_preset }}" ${{github.workspace}}
+
+      - name: Build
+        run: |
+          $threads = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+          cmake --build "./out/build/${{ matrix.cmake_preset }}" --parallel $threads
+
+      - name: Test
+        run: ctest --preset "${{ matrix.cmake_test_preset }}"
+        env:
+          CTEST_OUTPUT_ON_FAILURE: true
