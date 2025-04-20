@@ -51,8 +51,14 @@ if (${PROJECT_NAME}_STATIC_ANALYSIS)
     enable_static_analysis(${TARGET_NAME} "${${PROJECT_NAME}_WARNINGS_AS_ERRORS}")
 endif ()
 
-target_link_libraries(${TARGET_NAME} PUBLIC spdlog::spdlog date::date date::date-tz)
+target_compile_features(${TARGET_NAME} INTERFACE cxx_std_23)
 
+target_link_libraries(${TARGET_NAME} 
+        PUBLIC 
+        spdlog::spdlog 
+        date::date 
+        date::date-tz
+)
 
 if (${PROJECT_NAME}_INSTALL)
     install(DIRECTORY "include/${TARGET_EXPORT_NAME}" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
