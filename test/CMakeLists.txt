@@ -12,6 +12,11 @@ find_package(CURL REQUIRED)
 # Link against Google Test and the pillar library
 target_link_libraries(PillarTests PRIVATE gtest_main pillar::pillar CURL::libcurl_static)
 
+# Define build directory path for tests to use for temporary files
+target_compile_definitions(PillarTests PRIVATE 
+    CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}
+)
+
 # Add a test that runs all tests
 add_test(NAME pillar.all_tests COMMAND PillarTests)
 

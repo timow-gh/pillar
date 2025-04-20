@@ -3,6 +3,10 @@
 #include <pillar/Date.hpp>
 #include <pillar/XDGBaseDirectories.hpp>
 
+// Stringify the compile definition CMAKE_BINARY_DIR
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 class PillarDateTest : public ::testing::Test {
 protected:
   
@@ -29,7 +33,8 @@ protected:
     ASSERT_FALSE(std::filesystem::exists(m_testDir));
   }
 
-  std::filesystem::path m_testDir = pillar::xdg::get_data_home("timow", "pillar_test");
+  // Use a path in the build directory instead of XDG data home which might not be writable in CI environments
+  std::filesystem::path m_testDir = std::filesystem::path(TOSTRING(CMAKE_BINARY_DIR)) / std::filesystem::path("pillar_test_tmp");
   std::filesystem::path m_tzdbDirectory = m_testDir / "tzdata";
 };
 
