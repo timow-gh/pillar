@@ -4,6 +4,7 @@
 #include <expected>
 #include <filesystem>
 #include <string>
+#include <system_error>
 
 /**
  * Resources for working with dates and times.
@@ -34,7 +35,7 @@ public:
 
 enum class DateErrors : std::uint8_t
 {
-  SUCCESS = 0,
+  SUCCESS = 0, /**< 0 must represent success for every error_category */
   PATH_IS_EMPTY,
   PATH_IS_NOT_A_DIRECTORY,
   PATH_ALREADY_EXISTS,

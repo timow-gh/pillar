@@ -37,6 +37,7 @@ if (NOT CMAKE_PROGRAM)
 endif ()
 message(STATUS "Found cmake: ${CMAKE_PROGRAM}")
 
+
 # Check if the 7z.exe file exists in the specified path
 if (EXISTS "C:/Program Files (x86)/7-Zip/7z.exe")
     message(STATUS "7z.exe found in the specified path.")
@@ -46,27 +47,46 @@ else ()
     return()
 endif ()
 
-# Configure the curl project without zlib
-execute_process(
-        COMMAND ${CMAKE_PROGRAM} -S ${CURL_SOURCE_DIR} -B ${CURL_BUILD_DIR} -G ${CMAKE_GENERATOR}
-        -DBUILD_SHARED_LIBS=OFF
-        -DCMAKE_BUILD_TYPE=${CURL_BUILD_TYPE}
-        -DCMAKE_INSTALL_PREFIX=${CURL_INSTALL_DIR}
-        -DCURL_WERROR=OFF
-        -DPICKY_COMPILER=ON
-        -DBUILD_CURL_EXE=ON
-        -DBUILD_SHARED_LIBS=OFF
-        -DBUILD_STATIC_LIBS=ON
-        -DBUILD_STATIC_CURL=ON
-        -DENABLE_ARES=OFF
-        -DCURL_DISABLE_INSTALL=OFF
-        -DCURL_USE_SCHANNEL=ON
-        -DCURL_ZLIB=OFF
-        -DCURL_BROTLI=OFF
-        -DCURL_ZSTD=OFF
-        RESULT_VARIABLE CURL_CONFIGURE_RESULT
-        ERROR_VARIABLE CURL_CONFIGURE_ERROR_RESULT
-)
+# Configure the curl project
+if (PLATFORM_ID STREQUAL "Windows")
+        execute_process(
+                COMMAND ${CMAKE_PROGRAM} -S ${CURL_SOURCE_DIR} -B ${CURL_BUILD_DIR} -G ${CMAKE_GENERATOR}
+                -DBUILD_SHARED_LIBS=OFF
+                -DCMAKE_BUILD_TYPE=${CURL_BUILD_TYPE}
+                -DCMAKE_INSTALL_PREFIX=${CURL_INSTALL_DIR}
+                -DCURL_WERROR=OFF
+                -DPICKY_COMPILER=ON
+                -DBUILD_CURL_EXE=ON
+                -DBUILD_SHARED_LIBS=OFF
+                -DBUILD_STATIC_LIBS=ON
+                -DBUILD_STATIC_CURL=ON
+                -DENABLE_ARES=OFF
+                -DCURL_DISABLE_INSTALL=OFF
+                -DCURL_USE_SCHANNEL=ON
+                -DCURL_ZLIB=OFF
+                -DCURL_BROTLI=OFF
+                -DCURL_ZSTD=OFF
+                RESULT_VARIABLE CURL_CONFIGURE_RESULT
+                ERROR_VARIABLE CURL_CONFIGURE_ERROR_RESULT)
+else()
+        execute_process(
+                COMMAND ${CMAKE_PROGRAM} -S ${CURL_SOURCE_DIR} -B ${CURL_BUILD_DIR} -G ${CMAKE_GENERATOR}
+                -DBUILD_SHARED_LIBS=OFF
+                -DCMAKE_BUILD_TYPE=${CURL_BUILD_TYPE}
+                -DCMAKE_INSTALL_PREFIX=${CURL_INSTALL_DIR}
+                -DCURL_WERROR=OFF
+                -DPICKY_COMPILER=ON
+                -DBUILD_CURL_EXE=ON
+                -DBUILD_SHARED_LIBS=OFF
+                -DBUILD_STATIC_LIBS=ON
+                -DBUILD_STATIC_CURL=ON
+                -DENABLE_ARES=OFF
+                -DCURL_ZLIB=OFF
+                -DCURL_BROTLI=OFF
+                -DCURL_ZSTD=OFF
+                RESULT_VARIABLE CURL_CONFIGURE_RESULT
+                ERROR_VARIABLE CURL_CONFIGURE_ERROR_RESULT)
+endif()
 print_result_vars(CURL_CONFIGURE)
 
 # Build curl project
