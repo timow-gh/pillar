@@ -37,18 +37,17 @@ if (NOT CMAKE_PROGRAM)
 endif ()
 message(STATUS "Found cmake: ${CMAKE_PROGRAM}")
 
-
-# Check if the 7z.exe file exists in the specified path
-if (EXISTS "C:/Program Files (x86)/7-Zip/7z.exe")
-    message(STATUS "7z.exe found in the specified path.")
-else ()
-    message(FATAL_ERROR "7z.exe not found in the required path. date library requires 7-zip to be installed and either retrievable via the registry or installed in the path \"C:/Program Files (x86)/7-Zip/7z.exe\", thats insane!")
-    message(WARNING "Getting rid of this ridiculous requirement is on the TODO list and will require a fork or a merge request to the date library")
-    return()
-endif ()
-
 # Configure the curl project
 if (PLATFORM_ID STREQUAL "Windows")
+        # Check if the 7z.exe file exists in the specified path
+        if (EXISTS "C:/Program Files (x86)/7-Zip/7z.exe")
+                message(STATUS "7z.exe found in the specified path.")
+        else ()
+                message(FATAL_ERROR "7z.exe not found in the required path. date library requires 7-zip to be installed and either retrievable via the registry or installed in the path \"C:/Program Files (x86)/7-Zip/7z.exe\", thats insane!")
+                message(WARNING "Getting rid of this ridiculous requirement is on the TODO list and will require a fork or a merge request to the date library")
+                return()
+        endif ()
+
         execute_process(
                 COMMAND ${CMAKE_PROGRAM} -S ${CURL_SOURCE_DIR} -B ${CURL_BUILD_DIR} -G ${CMAKE_GENERATOR}
                 -DBUILD_SHARED_LIBS=OFF
@@ -62,7 +61,7 @@ if (PLATFORM_ID STREQUAL "Windows")
                 -DBUILD_STATIC_CURL=ON
                 -DENABLE_ARES=OFF
                 -DCURL_DISABLE_INSTALL=OFF
-                -DCURL_USE_SCHANNEL=ON
+                -DCURL_USE_SCHANNEL=ON # Windows specific
                 -DCURL_ZLIB=OFF
                 -DCURL_BROTLI=OFF
                 -DCURL_ZSTD=OFF

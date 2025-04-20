@@ -63,12 +63,33 @@
       }
     },
     {
+      "name": "conf-unixlike-clang-common",
+      "description": "Common settings for clang compiler on Unix-like OS",
+      "hidden": true,
+      "inherits": "conf-unixlike-common",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang-20",
+        "CMAKE_CXX_COMPILER": "clang++-20",
+        "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
+      }
+    },
+    {
+      "name": "conf-unixlike-gcc-common",
+      "description": "Common settings for gcc compiler on Unix-like OS",
+      "hidden": true,
+      "inherits": "conf-unixlike-common",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
       "name": "windows-msvc-debug",
       "displayName": "msvc Debug (User Mode)",
       "description": "Target Windows with the msvc compiler, debug build type",
       "inherits": "conf-windows-common",
       "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -77,28 +98,24 @@
       "description": "Target Windows with the msvc compiler, release build type",
       "inherits": "conf-windows-common",
       "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {
       "name": "unixlike-gcc-debug",
       "displayName": "gcc Debug",
       "description": "Target Unix-like OS with the gcc compiler, debug build type",
-      "inherits": "conf-unixlike-common",
+      "inherits": "conf-unixlike-gcc-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "unixlike-gcc-relwithdebinfo",
       "displayName": "gcc Release",
-      "description": "Target Unix-like OS with the gcc compiler, release build type",
-      "inherits": "conf-unixlike-common",
+      "description": "Target Unix-like OS with the gcc compiler, release with debug info build type",
+      "inherits": "conf-unixlike-gcc-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
@@ -106,10 +123,8 @@
       "name": "unixlike-gcc-release",
       "displayName": "gcc Release",
       "description": "Target Unix-like OS with the gcc compiler, release build type",
-      "inherits": "conf-unixlike-common",
+      "inherits": "conf-unixlike-gcc-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
@@ -117,36 +132,27 @@
       "name": "unixlike-clang-debug",
       "displayName": "clang Debug",
       "description": "Target Unix-like OS with the clang compiler, debug build type",
-      "inherits": "conf-unixlike-common",
+      "inherits": "conf-unixlike-clang-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "unixlike-clang-reldebug",
-      "displayName": "clang Release",
-      "description": "Target Unix-like OS with the clang compiler, release build type",
-      "inherits": "conf-unixlike-common",
+      "displayName": "clang RelWithDebInfo",
+      "description": "Target Unix-like OS with the clang compiler, release with debug info build type",
+      "inherits": "conf-unixlike-clang-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {
       "name": "unixlike-clang-release",
       "displayName": "clang Release",
       "description": "Target Unix-like OS with the clang compiler, release build type",
-      "inherits": "conf-unixlike-common",
+      "inherits": "conf-unixlike-clang-common",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_CXX_FLAGS": "-stdlib=libstdc++"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ],
