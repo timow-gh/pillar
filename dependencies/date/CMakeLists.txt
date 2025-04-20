@@ -38,7 +38,7 @@ endif ()
 message(STATUS "Found cmake: ${CMAKE_PROGRAM}")
 
 # Configure the curl project
-if (PLATFORM_ID STREQUAL "Windows")
+if (MSVC)
         # Check if the 7z.exe file exists in the specified path
         if (EXISTS "C:/Program Files (x86)/7-Zip/7z.exe")
                 message(STATUS "7z.exe found in the specified path.")
