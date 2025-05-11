@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <pillar/Assert.hpp>
+#include <pillar/assert.hpp>
 #include <iostream>
 
 TEST(AssertTest, assertion)

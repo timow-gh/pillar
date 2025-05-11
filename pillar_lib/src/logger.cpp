@@ -1,6 +1,6 @@
-#include "pillar/Logger.hpp"
-#include "pillar/Assert.hpp"
-#include "pillar/XDGBaseDirectories.hpp"
+#include "pillar/logger.hpp"
+#include "pillar/assert.hpp"
+#include "pillar/xdgdirectories.hpp"
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 

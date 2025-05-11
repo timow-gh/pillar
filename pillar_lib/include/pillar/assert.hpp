@@ -1,7 +1,7 @@
 #ifndef PILLAR_ASSERT_HPP
 #define PILLAR_ASSERT_HPP
 
-#include "pillar/Compiler.hpp"
+#include "pillar/compiler.hpp"
 
 // Check if we're on windows and have access to __debugbreak().
 #if !defined(PILLAR_DEBUGBREAK)

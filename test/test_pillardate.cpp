@@ -1,15 +1,13 @@
-#include <fstream>
+#include "pillar/date.hpp"
 #include <gtest/gtest.h>
-#include <pillar/Date.hpp>
-#include <pillar/XDGBaseDirectories.hpp>
+#include <fstream>
 
 // Stringify the compile definition CMAKE_BINARY_DIR
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-class PillarDateTest : public ::testing::Test {
+class test_pillardate : public ::testing::Test {
 protected:
-  
   // cppcheck-suppress unusedFunction
   void SetUp() override
   {
@@ -23,9 +21,7 @@ protected:
   }
 
   // cppcheck-suppress unusedFunction
-  void TearDown() override { 
-    remove_data_dir(); 
-  }
+  void TearDown() override { remove_data_dir(); }
 
   void remove_data_dir()
   {
@@ -38,28 +34,28 @@ protected:
   std::filesystem::path m_tzdbDirectory = m_testDir / "tzdata";
 };
 
-class PillarDateFailDBTest : public ::testing::Test {
+class test_pillardatefaildbtest : public ::testing::Test {
 
 protected:
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(PillarDateFailDBTest, tzdb_get_directory)
+TEST_F(test_pillardatefaildbtest, tzdb_get_directory)
 {
   const auto& dbDir = pillar::date::get_time_zone_db_directory();
   EXPECT_FALSE(dbDir.has_value());
   EXPECT_EQ(pillar::date::DateErrors::TZDB_DIRECTORY_NOT_SET, dbDir.error());
 }
 
-TEST_F(PillarDateTest, tzdb_get_directory)
+TEST_F(test_pillardate, tzdb_get_directory)
 {
   const auto& dbDir = pillar::date::get_time_zone_db_directory();
   EXPECT_TRUE(dbDir.has_value());
   EXPECT_EQ(dbDir.value(), m_tzdbDirectory);
 }
 
-TEST_F(PillarDateTest, set_time_zone_db_directory)
+TEST_F(test_pillardate, set_time_zone_db_directory)
 {
   pillar::date::DateErrors res = pillar::date::set_time_zone_db_directory("");
   EXPECT_EQ(pillar::date::DateErrors::PATH_IS_EMPTY, res);
@@ -72,7 +68,7 @@ TEST_F(PillarDateTest, set_time_zone_db_directory)
   EXPECT_EQ(pillar::date::DateErrors::PATH_IS_NOT_A_DIRECTORY, res);
 }
 
-TEST_F(PillarDateTest, get_utc_time)
+TEST_F(test_pillardate, get_utc_time)
 {
   pillar::date::UTCTimeString utcTime = pillar::date::get_utc_time_string();
   ASSERT_FALSE(utcTime.get_string().empty());

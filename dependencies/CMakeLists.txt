@@ -1,4 +1,8 @@
 include(FetchContent)
 
 add_subdirectory(date)
-add_subdirectory(googletest)
+
+if(${PROJECT_NAME}_TESTS)
+    add_subdirectory(googletest)
+endif()
+

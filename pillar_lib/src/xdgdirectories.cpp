@@ -1,4 +1,4 @@
-#include "pillar/XDGBaseDirectories.hpp"
+#include "pillar/xdgdirectories.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <vector>

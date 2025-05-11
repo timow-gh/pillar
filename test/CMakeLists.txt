@@ -1,10 +1,11 @@
 # Create a single test executable with all test files
 add_executable(PillarTests
-    AssertTest.cpp
-    LoggerTest.cpp
-    PillarDateTest.cpp
-    XDGBaseDirectoriesTest.cpp
-    CurlTest.cpp
+    test_assert.cpp
+    test_logger.cpp
+    test_pillardate.cpp
+    test_xdgdirectories.cpp
+    test_curl.cpp
+    test_bytereader.cpp
 )
 
 find_package(CURL REQUIRED)
@@ -20,9 +21,9 @@ target_compile_definitions(PillarTests PRIVATE
 # Add a test that runs all tests
 add_test(NAME pillar.all_tests COMMAND PillarTests)
 
-# Add individual test targets that filter specific test suites
-add_test(NAME pillar.AssertTest COMMAND PillarTests --gtest_filter=AssertTest.*)
-add_test(NAME pillar.LoggerTest COMMAND PillarTests --gtest_filter=LoggerTest.*)
-add_test(NAME pillar.PillarDateTest COMMAND PillarTests --gtest_filter=PillarDateTest.*)
-add_test(NAME pillar.XDGBaseDirectoriesTest COMMAND PillarTests --gtest_filter=XDGBaseDirectoriesTest.*)
-add_test(NAME pillar.CurlTest COMMAND PillarTests --gtest_filter=CurlTest.*)
+add_test(NAME pillar.test_assert COMMAND PillarTests --gtest_filter=test_assert.*)
+add_test(NAME pillar.test_bytereader COMMAND PillarTests --gtest_filter=test_bytereader.*)
+add_test(NAME pillar.test_curl COMMAND PillarTests --gtest_filter=test_curl.*)
+add_test(NAME pillar.test_logger COMMAND PillarTests --gtest_filter=test_logger.*)
+add_test(NAME pillar.test_pillardate COMMAND PillarTests --gtest_filter=test_pillardate.*)
+add_test(NAME pillar.test_xdgdirectories COMMAND PillarTests --gtest_filter=test_xdgdirectories.*)

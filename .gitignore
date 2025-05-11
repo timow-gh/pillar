@@ -8,6 +8,7 @@ conan-cache/
 CMakeUserPresets.json
 
 # IDE files
+.cache/
 .vs/
 .idea/
 .vscode/
@@ -33,3 +34,4 @@ $RECYCLE.BIN/
 ehthumbs.db
 Thumbs.db
 /CPMSourceVariable.cmake
+compile_commands.json

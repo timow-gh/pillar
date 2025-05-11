@@ -1,17 +1,17 @@
 set(PillarHeaders
-        include/pillar/Assert.hpp
-        include/pillar/Compiler.hpp
-        include/pillar/Date.hpp
-        include/pillar/Logger.hpp
-        include/pillar/Warnings.hpp
-        include/pillar/XDGBaseDirectories.hpp
+        include/pillar/assert.hpp
+        include/pillar/compiler.hpp
+        include/pillar/date.hpp
+        include/pillar/logger.hpp
+        include/pillar/warnings.hpp
+        include/pillar/xdgdirectories.hpp
 )
 
 set(PillarSources
-        src/Assert.cpp
-        src/Date.cpp
-        src/Logger.cpp
-        src/XDGBaseDirectories.cpp
+        src/assert.cpp
+        src/date.cpp
+        src/logger.cpp
+        src/xdgdirectories.cpp
 )
 
 set(TARGET_NAME tw_pillar)

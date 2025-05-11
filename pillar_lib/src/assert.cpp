@@ -1,4 +1,4 @@
-#include "pillar/Assert.hpp"
+#include "pillar/assert.hpp"
 #include <cstdio>
 
 namespace pillar
